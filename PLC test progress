@@ -1,0 +1,182 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using S7.Net;
+
+namespace test
+{
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+            combobox1_show();
+            comboBox1.SelectedIndex = 0;
+            label7.Text = "";
+            label6.Text = "";
+        }
+
+        void combobox1_show()
+        {
+            comboBox1.Items.Add("Real");
+            comboBox1.Items.Add("Int");
+            comboBox1.Items.Add("Bool");
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                Plc plc = new Plc(CpuType.S71500, textBox1.Text, Convert.ToInt16(textBox2.Text), Convert.ToInt16(textBox3.Text));
+                plc.Open();
+                if (plc.IsAvailable == true) { label4.Text = "IsAvailable链接成功"; } else { label4.Text = "IsAvailable链接失败"; }
+                if (plc.IsConnected == true) { label5.Text = "IsConnected连接成功"; } else { label5.Text = "IsConnected连接失败"; }
+                plc.Close();
+            }
+            catch { }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                Plc plc1 = new Plc(CpuType.S71500, textBox1.Text, Convert.ToInt16(textBox2.Text), Convert.ToInt16(textBox3.Text));
+                plc1.Open();
+                try
+                {
+                    switch (comboBox1.Text)
+                    {
+                        case "Real":
+                            double double_Value = ((uint)plc1.Read(textBox4.Text)).ConvertToDouble();
+                            label7.Text = double_Value.ToString("0.00");
+                            break;
+
+                        case "Int":
+                            int int_Value = Convert.ToInt16(plc1.Read(textBox4.Text));
+                            label7.Text = int_Value.ToString();
+                            break;
+
+                        case "Bool":
+                            bool bool_Value = Convert.ToBoolean(plc1.Read(textBox4.Text));
+                            label7.Text = bool_Value.ToString();
+                            break;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+                finally
+                {
+                    plc1.Close();
+                }
+            }
+            catch (Exception ex) { MessageBox.Show(ex.Message); }
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                Plc plc1 = new Plc(CpuType.S71500, textBox1.Text, Convert.ToInt16(textBox2.Text), Convert.ToInt16(textBox3.Text));
+                plc1.Open();
+                try
+                {
+                    switch (comboBox1.Text)
+                    {
+                        case "Real":
+                            double value = Convert.ToDouble(textBox5.Text);
+                            plc1.Write(textBox4.Text, value.ConvertToUInt());
+                            double double_Value = ((uint)plc1.Read(textBox4.Text)).ConvertToDouble();
+                            label7.Text=label6.Text = double_Value.ToString("0.00");
+                            break;
+
+                        case "Int":
+                            int value1 = Convert.ToInt32(textBox5.Text);
+                            plc1.Write(textBox4.Text, value1);
+                            int int_Value = Convert.ToInt16(plc1.Read(textBox4.Text));
+                            label7.Text =label6.Text = int_Value.ToString();
+                            break;
+
+                        case "Bool":
+                            bool value2 = Convert.ToBoolean(textBox5.Text);
+                            plc1.Write(textBox4.Text, value2);
+                            bool bool_Value = Convert.ToBoolean(plc1.Read(textBox4.Text));
+                           label7.Text = label6.Text = bool_Value.ToString();
+                            break;
+                    }
+
+
+                    int MyData = Convert.ToInt16(textBox5.Text);
+                    string val = textBox4.Text;
+                    plc1.Write(val, MyData);
+
+                    //double Value = ((uint)plc1.Read(textBox4.Text)).ConvertToDouble();
+                    int Value = Convert.ToInt16(plc1.Read(textBox4.Text));
+                    label7.Text = Value.ToString();
+
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+                finally { plc1.Close(); }
+            }
+            catch(Exception ex){ MessageBox.Show(ex.Message); }
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            label7.Text = "";
+            label6.Text = "";
+            textBox4.Text = "";
+            textBox5.Text = "";
+        }
+
+        #region 写入
+        public static void writeint(string PLCaddress, string variables, string val)
+        {
+            Plc plc1 = new Plc(CpuType.S71500, PLCaddress, 0, 1);
+            plc1.Open();
+            int MyData = Convert.ToInt16(val);
+            plc1.Write(variables, MyData);
+            plc1.Close();
+        }
+
+        public static void writedouble(string PLCaddress, string variables, string val)
+        {
+            Plc plc1 = new Plc(CpuType.S71500, PLCaddress, 0, 1);
+            plc1.Open();
+            double MyData = Convert.ToDouble(val);
+            plc1.Write(variables, MyData.ConvertToUInt());
+            plc1.Close();
+        }
+
+        public static void writeshort(string PLCaddress, string variables, string val)
+        {
+            Plc plc1 = new Plc(CpuType.S71500, PLCaddress, 0, 1);
+            plc1.Open();
+            short MyData = Convert.ToInt16(val);
+            plc1.Write(variables, MyData.ConvertToUshort());
+            plc1.Close();
+        }
+
+        public static void writebool(string PLCaddress, string variables, bool val)
+        {
+            Plc plc1 = new Plc(CpuType.S71500, PLCaddress, 0, 1);
+            plc1.Open();
+            bool MyDate = Convert.ToBoolean(val);
+            plc1.Write(variables, MyDate);
+            plc1.Close();
+        }
+        #endregion
+
+
+    }
+}
